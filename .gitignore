@@ -1,0 +1,7 @@
+# Connection files and secrets never get committed
+*connections*.yaml
+*.env
+
+.DS_Store
+Thumbs.db
+node_modules/
