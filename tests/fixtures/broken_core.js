@@ -1,5 +1,5 @@
 // Deliberately broken core, loaded after gf-core by `node tests/selftest.mjs --self-test`.
-// EXPECT_FAILING: ["checkout plan: Stardog request shapes", "cart: a relationship without its classes", "identity: a class keyed differently", "live: only rdf:type constants name a class", "connections: YAML profiles with defaults", "live: every stated domain is kept", "live: one mapping split over several TriplesMaps", "live: a schema that combines other schemas", "live: the most specific schema owns a term", "sms2: expression binds stay expressions", "project: a saved project never carries a password", "checkout run: an existing database keeps the reasoning schemas", "checkout run: a graph that holds data is not replaced", "history: deployment records read back", "trust: on request", "virtual graphs: none is missed", "checkout run: the record names only", "checkout: every source system gets its own", "rules: a rule’s own PREFIX lines", "schemas: the default reasoning schema", "mapping blocks: only the statements", "designer: a cart becomes a project", "layout: boxes never overlap", "data side: what each block reads", "fog: other sources for parts already filled"]
+// EXPECT_FAILING: ["checkout plan: Stardog request shapes", "cart: a relationship without its classes", "identity: a class keyed differently", "live: only rdf:type constants name a class", "connections: YAML profiles with defaults", "live: every stated domain is kept", "live: one mapping split over several TriplesMaps", "live: a schema that combines other schemas", "live: the most specific schema owns a term", "sms2: expression binds stay expressions", "project: a saved project never carries a password", "checkout run: an existing database keeps the reasoning schemas", "checkout run: a graph that holds data is not replaced", "history: deployment records read back", "trust: on request", "virtual graphs: none is missed", "checkout run: the record names only", "checkout: every source system gets its own", "rules: a rule’s own PREFIX lines", "schemas: the default reasoning schema", "mapping blocks: only the statements", "designer: a cart becomes a project", "layout: boxes never overlap", "data side: what each block reads", "fog: other sources for parts already filled", "layout: Tidy Mycelium places every class apart", "use cases: what the user writes before checkout"]
 //
 // Breakage 1 — virtual-graph body with "mappings.syntax" at the top level. Stardog's server
 // reads it from inside "options", so a top-level key is silently ignored and the mappings are parsed with the wrong syntax.
@@ -148,4 +148,13 @@
   // also flag): the canvas then draws them as strongly as blocks the cart actually needs.
   var fg = GF.fogGraph;
   GF.fogGraph = function (ix, cart, opts) { var f = fg(ix, cart, opts); f.maps.forEach(function (m) { delete m.also; }); return f; };
+  // Breakage 27 — every redraw laid out from scratch. Symptom: adding one class to the cart moves
+  // every box the user was looking at, so the drawing they had learned is gone after each click.
+  var lg = GF.layoutGraph;
+  GF.layoutGraph = function (nodes, edges, pos) { return lg(nodes, edges, pos, true); };
+  // Breakage 28 — a role written without its team (org:postIn dropped from the minted post). Symptom:
+  // the model deploys and reads back, and the Use cases tab lists "Planner" with no team, although
+  // the user typed one before checkout.
+  var tt = GF.toTurtle;
+  GF.toTurtle = function (ix, iris, opts) { return tt(ix, iris, opts).replace(/ ;\n    org:postIn <[^>]*>/g, ''); };
 })();

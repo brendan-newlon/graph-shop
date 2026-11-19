@@ -1,4 +1,4 @@
-// Headless core self-test: extracts the gf-demo, gf-core, gf-sdx and gf-tests script blocks from
+// Headless core self-test: extracts the gf-demo, gf-layout, gf-core, gf-sdx and gf-tests script blocks from
 // graph-shop.html and runs the test cases in a Node VM. No network, no writes.
 //   node tests/selftest.mjs              run against graph-shop.html
 //   node tests/selftest.mjs --self-test  prove the harness catches a deliberately broken core
@@ -23,8 +23,8 @@ function block(html, id) {
 function run(extra) {
   const html = readFileSync(htmlPath, 'utf8');
   // the Designer block writes and reads files with the platform's compression and text codecs
-  const ctx = vm.createContext({ console, TextEncoder, TextDecoder, CompressionStream, DecompressionStream, Response, Blob, atob, btoa, crypto });
-  for (const id of ['gf-demo', 'gf-core', 'gf-sdx']) vm.runInContext(block(html, id), ctx, { filename: id });
+  const ctx = vm.createContext({ console, performance, TextEncoder, TextDecoder, CompressionStream, DecompressionStream, Response, Blob, atob, btoa, crypto });
+  for (const id of ['gf-demo', 'gf-layout', 'gf-core', 'gf-sdx']) vm.runInContext(block(html, id), ctx, { filename: id });
   if (extra) vm.runInContext(readFileSync(extra, 'utf8'), ctx, { filename: extra });
   vm.runInContext(block(html, 'gf-tests'), ctx, { filename: 'gf-tests' });
   return vm.runInContext('GF_TESTS.run()', ctx);
